@@ -33,8 +33,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public String requestPickup(Long suID) throws ServiceUnavailableException {
+        // get student based on SUID
         Student student = studentRepository.findBySuID(suID);
-
+        // calculate ETA from collegePlace to shuttle location
         double eta = calculateETA(collegePlace);
         String responseETA = "Shuttle arrives approximately in " + eta + " minutes";
 
@@ -42,15 +43,16 @@ public class StudentServiceImpl implements StudentService {
             throw new ServiceUnavailableException("SUID is not in the database");
         }
 
+        // If Student is in IDLE State, move to WAITING state
         if (student.getStudentStatus() == Status.IDLE) {
             student.setStudentStatus(Status.WAITING);
+            // Updating student record based on status
             saveToDB(student);
             Passenger passenger = new Passenger(suID, eta, Status.WAITING);
             cacheService.waitList.add(passenger);
             passengerService.saveToDB(passenger);
         } else if(student.getStudentStatus() == Status.WAITING) {
             throw new ServiceUnavailableException("You already requested a ride. " + responseETA);
-//            we can return updated ETA of shuttle to reach collegePlace
         } else if (student.getStudentStatus() == Status.PICKED) {
             throw new ServiceUnavailableException("You cannot request a shuttle while travelling in it");
         }
@@ -73,12 +75,11 @@ public class StudentServiceImpl implements StudentService {
             throw new ServiceUnavailableException("SUID already exists");
         }
 
-        student.setStudentStatus(Status.IDLE);
-
         try {
+            student.setStudentStatus(Status.IDLE);
             saveToDB(student);
             return student;
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new ServiceUnavailableException("Error while saving student to database");
         }
     }

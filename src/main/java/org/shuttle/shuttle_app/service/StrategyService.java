@@ -1,6 +1,7 @@
 package org.shuttle.shuttle_app.service;
 
 import lombok.Data;
+import org.springframework.context.ApplicationContext;
 import org.shuttle.shuttle_app.entity.Passenger;
 import org.shuttle.shuttle_app.entity.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,27 +11,22 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
-@Data
 public class StrategyService {
-    private final PassengerServiceImpl passengerService;
     private CacheService cacheService;
-
+    private DropStrategy dropStrategy;
     @Autowired
-    public StrategyService(PassengerServiceImpl passengerService, CacheService cacheService) {
-        this.passengerService = passengerService;
+    public StrategyService(CacheService cacheService, ApplicationContext applicationContext) {
         this.cacheService = cacheService;
+        this.dropStrategy = applicationContext.getBean("dropByETA", DropStrategy.class);
+        System.out.println("ssCache plist: " + cacheService.passengerList);
+        System.out.println("ssCache wlist: " + cacheService.waitList);
     }
 
     public Passenger getNextPassengerToBeDropped() {
 
-        if (cacheService.passengerList.isEmpty()) {
-            return null;
-        }
-
-        // Sorting the list of passengers by their ETA in ascending order
-        cacheService.passengerList.sort(Comparator.comparingDouble(Passenger::getEta));
-
-        return cacheService.passengerList.getFirst();
+        System.out.println("getNextPassengerToBeDropped function called\n");
+        System.out.println(cacheService.passengerList);
+        return dropStrategy.getNextPassengerToBeDropped();
 
     }
 

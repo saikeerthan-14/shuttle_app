@@ -63,6 +63,9 @@ public class ShuttleServiceImpl implements ShuttleService {
         double drop_lat = dropLocation.getLatitude();
         double drop_long = dropLocation.getLongitude();
 
+        System.out.println("Cache plist: " + cacheService.passengerList);
+        System.out.println("Cache wlist: " + cacheService.waitList);
+
         if (cacheService.waitList.isEmpty() && cacheService.passengerList.isEmpty()) {
             resetShuttleLocation();
         }
@@ -81,6 +84,7 @@ public class ShuttleServiceImpl implements ShuttleService {
             passenger.setDropAddress(dropAddress);
             passenger.setEta(studentServiceImpl.calculateETA(dropLocation));
             studentServiceImpl.saveToDB(student);
+            cacheService.passengerList.add(passenger);
             CacheService.removePassengerFromCache(passenger, cacheService.waitList);
             passengerServiceImpl.saveToDB(passenger);
             return "You have been picked " + student.getName() + " Details: " + passenger;
