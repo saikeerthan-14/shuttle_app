@@ -1,17 +1,24 @@
 package org.shuttle.shuttle_app.controller;
 
 import lombok.SneakyThrows;
+import org.shuttle.shuttle_app.entity.Passenger;
+import org.shuttle.shuttle_app.entity.Status;
+import org.shuttle.shuttle_app.service.PassengerServiceImpl;
 import org.shuttle.shuttle_app.service.ShuttleServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class ShuttleController {
     private final ShuttleServiceImpl shuttleService;
+    private final PassengerServiceImpl passengerServiceImpl;
 
     @Autowired
-    public ShuttleController(ShuttleServiceImpl shuttleService) {
+    public ShuttleController(ShuttleServiceImpl shuttleService, PassengerServiceImpl passengerServiceImpl) {
         this.shuttleService = shuttleService;
+        this.passengerServiceImpl = passengerServiceImpl;
     }
 
     @SneakyThrows
@@ -27,12 +34,17 @@ public class ShuttleController {
     }
 
     @PostMapping("/shuttleLocation")
-    public String shuttleLocation(@RequestParam double lat, @RequestParam double lon) {
-        return shuttleService.updateShuttleLocation(lat, lon);
+    public String shuttleLocation(@RequestParam double latitude, @RequestParam double longitude) {
+        return shuttleService.updateShuttleLocation(latitude, longitude);
     }
 
     @GetMapping("/shuttleLocation")
     public String shuttleLocation() {
         return shuttleService.getShuttleLocation();
+    }
+
+    @GetMapping("/getAllPassengers")
+    public List<Passenger> getPassengers() {
+        return passengerServiceImpl.getPassengersByStatus(Status.PICKED);
     }
 }

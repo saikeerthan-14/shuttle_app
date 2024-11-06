@@ -70,6 +70,8 @@ public class ShuttleServiceImpl implements ShuttleService {
         Student student = studentServiceImpl.findBySuid(suid);
         if (student == null ) {
             return "Student not found";
+        } else if(student.getStudentStatus() == Status.IDLE) {
+            return "Only pick-up requested students are allowed. Please raise pickup request";
         } else if (student.getStudentStatus() == Status.WAITING) {
             student.setStudentStatus(Status.PICKED);
             Passenger passenger = passengerServiceImpl.getPassengerBySUIDAndPassengerStatus(suid, Status.WAITING);
